@@ -1,0 +1,4 @@
+__pycache__
+virtual/
+*.jpg
+!test.jpg
