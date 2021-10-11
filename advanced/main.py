@@ -3,28 +3,31 @@ import sys
 import argparse
 import os
 
+import curses
 import cv2
 import numpy as np
 
-def asciifize(img, columns, rows, stdformat):
+def asciifize(stdscr, img, columns, rows, stdformat):
 
     step = 255/len(stdformat)
 
-    os.system("clear")
+    #os.system("clear")
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    resized = cv2.resize(gray, [columns, rows])
+    resized = cv2.resize(gray, [columns,rows])
 
     #cv2.imshow("frame",resized)
 
     toPrint = ""
     for i in range(rows):
         for j in range(columns):
+            stdscr.addstr(i,j,stdformat[int((resized[i,j]-1)/step)])
+
             toPrint += stdformat[int((resized[i,j]-1)/step)]
         toPrint += "\n"
 
-    print(toPrint)
+    return toPrint
 
-def main():
+def main(stdscr):
     parser = argparse.ArgumentParser(description = "A simple video parser, producing the ASCII grayscaled counterpart",formatter_class=argparse.RawTextHelpFormatter, add_help=True)
     parser.add_argument("-i","--input_video", type=str, help="The video to parse", default='none')
     parser.add_argument("-c","--columns", type=int, help="The max number of columns to use", default=240)
@@ -60,8 +63,11 @@ def main():
 
     ratio = int(width/columns+0.99)
     columns = int(width/ratio)
-    rows = int(height/ratio/2)
+    rows = int(height/ratio/3)
 
+    curses.curs_set(0)
+
+    result = ""
     while True:
         ret, img = cap.read()
         if ret:
@@ -69,14 +75,16 @@ def main():
 
             cv2.imshow("Video", img)
 
-            asciifize(img, columns, rows, stdformat)
-            print(fps)
+            result = asciifize(stdscr, img, columns, rows, stdformat)
+            stdscr.refresh()
 
             if cv2.waitKey(int((1/int(fps))*1000)) & 0xFF == ord('q'):
                 break
         else:
             break
-
     cap.release()
+
+    return result
+
 if __name__ == "__main__":
-    main()
+    print(curses.wrapper(main))
