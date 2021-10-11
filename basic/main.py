@@ -10,9 +10,12 @@ def main():
     parser.add_argument("img", type=str, help="The image to parse")
     parser.add_argument("-c","--columns", type=int, help="The max number of columns to use", default=240)
     parser.add_argument("-f","--format", help="The format to use", default='none', choices=['std', 'reverse_std', 'short', 'reverse_short'])
+    parser.add_argument("-v", "--verbose", help="modify output verbosity", action = "store_true")
+
     #parse the user's input
     args = parser.parse_args()
 
+    verbosity = args.verbose
     columns = args.columns
     rows = -1
 
@@ -44,9 +47,9 @@ def main():
                     tot += gray
             tot = int(tot/(ratio*ratio))
             grayscaled.putpixel((x,y),(tot,tot,tot))
-
-    img.show()
-    grayscaled.show()
+    if verbosity:
+    	img.show()
+    	grayscaled.show()
 
     step = 255/len(stdformat)
     for y in range(rows):
